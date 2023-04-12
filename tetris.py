@@ -19,12 +19,41 @@ PURPLE = (128, 0, 128)
 CYAN = (0, 255, 255)
 
 # Tetrominoes
-TETROMINOES = [
-    [
-        [1, 1, 1],
-        [1, 0, 0]
-    ],
+I = [
+    [1, 1, 1, 1]
 ]
+
+J = [
+    [1, 0, 0],
+    [1, 1, 1]
+]
+
+L = [
+    [0, 0, 1],
+    [1, 1, 1]
+]
+
+O = [
+    [1, 1],
+    [1, 1]
+]
+
+S = [
+    [0, 1, 1],
+    [1, 1, 0]
+]
+
+T = [
+    [0, 1, 0],
+    [1, 1, 1]
+]
+
+Z = [
+    [1, 1, 0],
+    [0, 1, 1]
+]
+TETROMINOES = [I, J, L, O, S, T, Z];
+
 
 class Tetris:
     def __init__(self):
@@ -51,7 +80,6 @@ class Tetris:
 
     def draw(self):
         self.screen.fill(BLACK)
-
         # Draw the game board, tetrominoes, and other elements here
         pygame.display.flip()
 
