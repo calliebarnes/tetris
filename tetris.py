@@ -10,56 +10,31 @@ GRID_SIZE = 30
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-RED = (255, 0, 0)
-GREEN = (0, 255, 0)
-BLUE = (0, 0, 255)
-YELLOW = (255, 255, 0)
-ORANGE = (255, 165, 0)
-PURPLE = (128, 0, 128)
-CYAN = (0, 255, 255)
 
 # Tetrominoes
-I = [
-    [1, 1, 1, 1]
+TETROMINOES = [
+    {"shape": [[1, 1, 1, 1]], "color": (0, 255, 255)},  # I
+    {"shape": [[1, 1], [1, 1]], "color": (255, 255, 0)},  # O
+    {"shape": [[0, 1, 0], [1, 1, 1]], "color": (128, 0, 128)},  # T
+    {"shape": [[0, 1, 1], [1, 1, 0]], "color": (0, 255, 0)},  # S
+    {"shape": [[1, 1, 0], [0, 1, 1]], "color": (255, 0, 0)},  # Z
+    {"shape": [[1, 0, 0], [1, 1, 1]], "color": (0, 0, 255)},  # J
+    {"shape": [[0, 0, 1], [1, 1, 1]], "color": (255, 165, 0)},  # L
 ]
 
-J = [
-    [1, 0, 0],
-    [1, 1, 1]
-]
+class Tetromino:
+    def __init__(self, x, y, shape, color):
+        self.x = x
+        self.y = y
+        self.shape = shape
+        self.color = color
 
-L = [
-    [0, 0, 1],
-    [1, 1, 1]
-]
+    def move(self, x, y):
+        self.x += x
+        self.y += y
 
-O = [
-    [1, 1],
-    [1, 1]
-]
-
-S = [
-    [0, 1, 1],
-    [1, 1, 0]
-]
-
-T = [
-    [0, 1, 0],
-    [1, 1, 1]
-]
-
-Z = [
-    [1, 1, 0],
-    [0, 1, 1]
-]
-TETROMINOES = [I, J, L, O, S, T, Z]
-
-# Board
-BOARD_WIDTH = 10
-BOARD_HEIGHT = 20
-def create_board():
-    return [[0 for _ in range(BOARD_WIDTH)] for _ in range(BOARD_HEIGHT)]
-
+    def rotate(self):
+        self.shape = list(zip(*reversed(self.shape)))
 
 class Tetris:
     def __init__(self):
@@ -67,6 +42,9 @@ class Tetris:
         self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption('Tetris')
         self.clock = pygame.time.Clock()
+        self.board = [[0] * 10 for _ in range(20)]
+        tetromino_data = random.choice(TETROMINOES)
+        self.current_piece = Tetromino(5, 0, tetromino_data['shape'], tetromino_data['color'])
 
     def run(self):
         while True:
@@ -80,35 +58,39 @@ class Tetris:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    self.current_piece.rotate()
+                if event.key == pygame.K_DOWN:
+                    self.current_piece.move(0, 1)
+                if event.key == pygame.K_LEFT:
+                    self.current_piece.move(-1, 0)
+                if event.key == pygame.K_RIGHT:
+                    self.current_piece.move(1, 0)
+
 
     def update(self):
         pass
 
     def draw(self):
         self.screen.fill(BLACK)
-        self.board = create_board()
         self.draw_board()
-        self.draw_tetromino(random.choice(TETROMINOES), 0, 0)
+        self.draw_tetromino(self.current_piece)
         pygame.display.flip()
-    
+
     def draw_board(self):
-        for y in range(BOARD_HEIGHT):
-            for x in range(BOARD_WIDTH):
-                if self.board[y][x] == 0:
-                    pygame.draw.rect(self.screen, WHITE, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
-                else:
-                    pygame.draw.rect(self.screen, WHITE, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE))
-    
-    def draw_tetromino(self, tetromino, x, y):
-        for i in range(len(tetromino)):
-            for j in range(len(tetromino[i])):
-                if tetromino[i][j] == 1:
-                    pygame.draw.rect(self.screen, WHITE, (x + j * GRID_SIZE, y + i * GRID_SIZE, GRID_SIZE, GRID_SIZE))
-    
-    def draw_text(self, text, x, y, color):
-        font = pygame.font.SysFont('Arial', 30)
-        text = font.render(text, True, color)
-        self.screen.blit(text, (x, y))
+         for y, row in enumerate(self.board):
+            for x, cell in enumerate(row):
+                if cell:
+                    pygame.draw.rect(self.screen, BLACK, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+
+
+    def draw_tetromino(self, tetromino):
+        for y, row in enumerate(tetromino.shape):
+            for x, cell in enumerate(row):
+                if cell:
+                    pygame.draw.rect(self.screen, tetromino.color, ((tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
+                    pygame.draw.rect(self.screen, BLACK, ((tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
 
 if __name__ == '__main__':
     tetris = Tetris()
