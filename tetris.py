@@ -35,6 +35,7 @@ class Tetromino:
 
     def rotate(self):
         self.shape = list(zip(*reversed(self.shape)))
+        
 
 class Tetris:
     def __init__(self):
@@ -60,14 +61,18 @@ class Tetris:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    self.current_piece.rotate()
+                    rotated_shape = list(zip(*reversed(self.current_piece.shape)))
+                    if not self.collision(0, 0, rotated_shape):
+                        self.current_piece.rotate()
                 if event.key == pygame.K_DOWN:
-                    self.current_piece.move(0, 1)
+                    if not self.collision(0, 1):
+                        self.current_piece.move(0, 1)
                 if event.key == pygame.K_LEFT:
-                    self.current_piece.move(-1, 0)
+                    if not self.collision(-1, 0):
+                        self.current_piece.move(-1, 0)
                 if event.key == pygame.K_RIGHT:
-                    self.current_piece.move(1, 0)
-
+                    if not self.collision(1, 0):
+                        self.current_piece.move(1, 0)
 
     def update(self):
         pass
@@ -91,6 +96,29 @@ class Tetris:
                 if cell:
                     pygame.draw.rect(self.screen, tetromino.color, ((tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
                     pygame.draw.rect(self.screen, BLACK, ((tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+
+    def collision(self, x_move, y_move, rotated_shape=None):
+        shape = rotated_shape if rotated_shape is not None else self.current_piece.shape
+            
+        for y, row in enumerate(shape):
+            for x, cell in enumerate(row):
+                if cell:
+                    board_x = self.current_piece.x + x + x_move
+                    board_y = self.current_piece.y + y + y_move
+
+                        # Check for out-of-bounds conditions
+                    if board_x < 0 or board_x >= len(self.board[0]) or board_y >= len(self.board):
+                        return True
+
+                        # Check for floor collision
+                    if board_y < 0:
+                        continue
+
+                        # Check for collision with locked Tetrominos
+                    if self.board[board_y][board_x]:
+                        return True
+
+        return False
 
 if __name__ == '__main__':
     tetris = Tetris()
