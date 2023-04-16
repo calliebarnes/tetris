@@ -91,8 +91,14 @@ class Tetris:
 
     def update(self):
         if self.game_over:
-            print("Game Over")
-            print("Score:", self.score)
+            font = pygame.font.Font(None, 72)
+            game_over_text = font.render("Game Over", True, WHITE)
+            score_text = font.render(f"Score: {self.score}", True, WHITE)
+            game_over_rect = game_over_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 50))
+            score_rect = score_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 50))
+            self.screen.blit(game_over_text, game_over_rect)
+            self.screen.blit(score_text, score_rect)
+            pygame.display.flip()
             return
 
         current_time = pygame.time.get_ticks()
