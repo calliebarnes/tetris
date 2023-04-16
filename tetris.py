@@ -23,6 +23,7 @@ TETROMINOES = [
     {"shape": [[0, 0, 1], [1, 1, 1]], "color": (255, 165, 0)},  # L
 ]
 
+
 class Tetromino:
     def __init__(self, x, y, shape, color):
         self.x = x
@@ -36,7 +37,7 @@ class Tetromino:
 
     def rotate(self):
         self.shape = list(zip(*reversed(self.shape)))
-        
+
 
 class Tetris:
     def __init__(self):
@@ -46,10 +47,13 @@ class Tetris:
         self.clock = pygame.time.Clock()
         self.board = [[0] * 10 for _ in range(20)]
         tetromino_data = random.choice(TETROMINOES)
-        self.current_piece = Tetromino(5, 0, tetromino_data['shape'], tetromino_data['color'])
+        self.current_piece = Tetromino(
+            5, 0, tetromino_data['shape'], tetromino_data['color'])
         self.gravity_timer = pygame.time.get_ticks()
         self.score = 0
         self.game_over = False
+        self.next_piece = self.generate_random_tetromino()
+
 
     def run(self):
         while True:
@@ -65,7 +69,8 @@ class Tetris:
                 sys.exit()
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_UP:
-                    rotated_shape = list(zip(*reversed(self.current_piece.shape)))
+                    rotated_shape = list(
+                        zip(*reversed(self.current_piece.shape)))
                     if not self.collision(0, 0, rotated_shape):
                         self.current_piece.rotate()
                 if event.key == pygame.K_DOWN:
@@ -77,8 +82,19 @@ class Tetris:
                 if event.key == pygame.K_RIGHT:
                     if not self.collision(1, 0):
                         self.current_piece.move(1, 0)
+    
+    def check_game_over(self):
+        for x, cell in enumerate(self.board[0]):
+            if cell:
+                self.game_over = True
+                break
 
     def update(self):
+        if self.game_over:
+            print("Game Over")
+            print("Score:", self.score)
+            return
+
         current_time = pygame.time.get_ticks()
         if current_time - self.gravity_timer >= GRAVITY_DELAY:
             if not self.collision(0, 1):
@@ -86,11 +102,8 @@ class Tetris:
             else:
                 self.lock_tetromino()
                 self.clear_lines()
+                self.check_game_over()
             self.gravity_timer = current_time
-
-        if self.game_over:
-            print("Game Over")
-            print("Score:", self.score)
 
     def draw_score(self):
         font = pygame.font.Font(None, 36)
@@ -102,33 +115,37 @@ class Tetris:
         self.draw_board()
         self.draw_tetromino(self.current_piece)
         self.draw_score()
+        self.draw_next_piece()
         pygame.display.flip()
 
     def draw_board(self):
         for y, row in enumerate(self.board):
             for x, cell in enumerate(row):
                 if cell:
-                    pygame.draw.rect(self.screen, cell, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
-                    pygame.draw.rect(self.screen, WHITE, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
-
+                    pygame.draw.rect(
+                        self.screen, cell, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
+                    pygame.draw.rect(
+                        self.screen, WHITE, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
 
     def draw_tetromino(self, tetromino):
         for y, row in enumerate(tetromino.shape):
             for x, cell in enumerate(row):
                 if cell:
-                    pygame.draw.rect(self.screen, tetromino.color, ((tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
-                    pygame.draw.rect(self.screen, WHITE, ((tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+                    pygame.draw.rect(self.screen, tetromino.color, ((
+                        tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
+                    pygame.draw.rect(self.screen, WHITE, ((
+                        tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
 
     def collision(self, x_move, y_move, rotated_shape=None):
         shape = rotated_shape if rotated_shape is not None else self.current_piece.shape
-            
+
         for y, row in enumerate(shape):
             for x, cell in enumerate(row):
                 if cell:
                     board_x = self.current_piece.x + x + x_move
                     board_y = self.current_piece.y + y + y_move
 
-                        # Check for out-of-bounds conditions
+                    # Check for out-of-bounds conditions
                     if board_x < 0 or board_x >= len(self.board[0]) or board_y >= len(self.board):
                         return True
 
@@ -141,7 +158,7 @@ class Tetris:
                         return True
 
         return False
-    
+
     def lock_tetromino(self):
         for y, row in enumerate(self.current_piece.shape):
             for x, cell in enumerate(row):
@@ -156,7 +173,10 @@ class Tetris:
                     self.board[board_y][board_x] = self.current_piece.color
 
         tetromino_data = random.choice(TETROMINOES)
-        self.current_piece = Tetromino(5, 0, tetromino_data['shape'], tetromino_data['color'])
+        self.current_piece = Tetromino(
+            5, 0, tetromino_data['shape'], tetromino_data['color'])
+        self.current_piece = self.next_piece
+        self.next_piece = self.generate_random_tetromino()
 
     def clear_lines(self):
         lines_to_clear = []
@@ -170,6 +190,22 @@ class Tetris:
             self.board.insert(0, [0] * 10)
 
         self.score += len(lines_to_clear) ** 2
+
+    def generate_random_tetromino(self):
+        tetromino_data = random.choice(TETROMINOES)
+        return Tetromino(5, 0, tetromino_data['shape'], tetromino_data['color'])
+
+    def draw_next_piece(self):
+        next_piece_x, next_piece_y = 12, 2
+        font = pygame.font.Font(None, 36)
+        text = font.render("Next Piece:", 1, WHITE)
+        self.screen.blit(text, (next_piece_x * GRID_SIZE, next_piece_y * GRID_SIZE))
+
+        for y, row in enumerate(self.next_piece.shape):
+            for x, cell in enumerate(row):
+                if cell:
+                    pygame.draw.rect(self.screen, self.next_piece.color, ((next_piece_x + x) * GRID_SIZE, (next_piece_y + y + 2) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
+                    pygame.draw.rect(self.screen, WHITE, ((next_piece_x + x) * GRID_SIZE, (next_piece_y + y + 2) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
 
 
 if __name__ == '__main__':
