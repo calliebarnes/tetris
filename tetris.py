@@ -7,10 +7,15 @@ SCREEN_WIDTH = 800
 SCREEN_HEIGHT = 600
 GRID_SIZE = 30
 GRAVITY_DELAY = 1000
+BOARD_WIDTH = 10
+BOARD_HEIGHT = 20
+BOARD_OFFSET_X = (SCREEN_WIDTH - GRID_SIZE * BOARD_WIDTH) // 2
+BOARD_OFFSET_Y = (SCREEN_HEIGHT - GRID_SIZE * BOARD_HEIGHT) // 2
 
 # Colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
+RED = (255, 0, 0)
 
 # Tetrominoes
 TETROMINOES = [
@@ -67,10 +72,7 @@ class Tetris:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_p:
-                    self.paused = not self.paused
-                if not self.paused:
-                    self.handle_piece_movement(event)
+                self.handle_piece_movement(event)
 
     def handle_piece_movement(self, event):
         if event.key == pygame.K_UP:
@@ -126,19 +128,20 @@ class Tetris:
             for x, cell in enumerate(row):
                 if cell:
                     pygame.draw.rect(
-                        self.screen, cell, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
+                        self.screen, cell, (BOARD_OFFSET_X + x * GRID_SIZE, BOARD_OFFSET_Y + y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
                     pygame.draw.rect(
-                        self.screen, WHITE, (x * GRID_SIZE, y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+                        self.screen, WHITE, (BOARD_OFFSET_X + x * GRID_SIZE, BOARD_OFFSET_Y + y * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
 
+        board_outline_rect = pygame.Rect(BOARD_OFFSET_X, BOARD_OFFSET_Y, 10 * GRID_SIZE, 20 * GRID_SIZE)
+        pygame.draw.rect(self.screen, WHITE, board_outline_rect, 3)
+        
     def draw_tetromino(self, tetromino):
         for y, row in enumerate(tetromino.shape):
             for x, cell in enumerate(row):
                 if cell:
-                    pygame.draw.rect(self.screen, tetromino.color, ((
-                        tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
-                    pygame.draw.rect(self.screen, WHITE, ((
-                        tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
-                    
+                    pygame.draw.rect(self.screen, tetromino.color, (BOARD_OFFSET_X + (tetromino.x + x) * GRID_SIZE, BOARD_OFFSET_Y + (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
+                    pygame.draw.rect(self.screen, WHITE, (BOARD_OFFSET_X + (tetromino.x + x) * GRID_SIZE, BOARD_OFFSET_Y + (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+
     def draw_paused(self):
         font = pygame.font.Font(None, 72)
         paused_text = font.render("Paused", True, WHITE)
@@ -214,7 +217,7 @@ class Tetris:
         return Tetromino(5, 0, tetromino_data['shape'], tetromino_data['color'])
 
     def draw_next_piece(self):
-        next_piece_x, next_piece_y = 12, 2
+        next_piece_x, next_piece_y = 20, 2
         font = pygame.font.Font(None, 36)
         text = font.render("Next Piece:", 1, WHITE)
         self.screen.blit(text, (next_piece_x * GRID_SIZE, next_piece_y * GRID_SIZE))
