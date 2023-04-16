@@ -23,7 +23,6 @@ TETROMINOES = [
     {"shape": [[0, 0, 1], [1, 1, 1]], "color": (255, 165, 0)},  # L
 ]
 
-
 class Tetromino:
     def __init__(self, x, y, shape, color):
         self.x = x
@@ -38,7 +37,6 @@ class Tetromino:
     def rotate(self):
         self.shape = list(zip(*reversed(self.shape)))
 
-
 class Tetris:
     def __init__(self):
         pygame.init()
@@ -52,13 +50,14 @@ class Tetris:
         self.gravity_timer = pygame.time.get_ticks()
         self.score = 0
         self.game_over = False
+        self.paused = False
         self.next_piece = self.generate_random_tetromino()
-
 
     def run(self):
         while True:
             self.handle_events()
-            self.update()
+            if not self.paused and not self.game_over:
+                self.update()
             self.draw()
             self.clock.tick(30)
 
@@ -68,20 +67,25 @@ class Tetris:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_UP:
-                    rotated_shape = list(
-                        zip(*reversed(self.current_piece.shape)))
-                    if not self.collision(0, 0, rotated_shape):
-                        self.current_piece.rotate()
-                if event.key == pygame.K_DOWN:
-                    if not self.collision(0, 1):
-                        self.current_piece.move(0, 1)
-                if event.key == pygame.K_LEFT:
-                    if not self.collision(-1, 0):
-                        self.current_piece.move(-1, 0)
-                if event.key == pygame.K_RIGHT:
-                    if not self.collision(1, 0):
-                        self.current_piece.move(1, 0)
+                if event.key == pygame.K_p:
+                    self.paused = not self.paused
+                if not self.paused:
+                    self.handle_piece_movement(event)
+
+    def handle_piece_movement(self, event):
+        if event.key == pygame.K_UP:
+            rotated_shape = list(zip(*reversed(self.current_piece.shape)))
+            if not self.collision(0, 0, rotated_shape):
+                self.current_piece.rotate()
+        if event.key == pygame.K_DOWN:
+            if not self.collision(0, 1):
+                self.current_piece.move(0, 1)
+        if event.key == pygame.K_LEFT:
+            if not self.collision(-1, 0):
+                self.current_piece.move(-1, 0)
+        if event.key == pygame.K_RIGHT:
+            if not self.collision(1, 0):
+                self.current_piece.move(1, 0)
     
     def check_game_over(self):
         for x, cell in enumerate(self.board[0]):
@@ -90,17 +94,6 @@ class Tetris:
                 break
 
     def update(self):
-        if self.game_over:
-            font = pygame.font.Font(None, 72)
-            game_over_text = font.render("Game Over", True, WHITE)
-            score_text = font.render(f"Score: {self.score}", True, WHITE)
-            game_over_rect = game_over_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 50))
-            score_rect = score_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 50))
-            self.screen.blit(game_over_text, game_over_rect)
-            self.screen.blit(score_text, score_rect)
-            pygame.display.flip()
-            return
-
         current_time = pygame.time.get_ticks()
         if current_time - self.gravity_timer >= GRAVITY_DELAY:
             if not self.collision(0, 1):
@@ -122,6 +115,10 @@ class Tetris:
         self.draw_tetromino(self.current_piece)
         self.draw_score()
         self.draw_next_piece()
+        if self.paused:
+            self.draw_paused()
+        if self.game_over:
+            self.draw_game_over()
         pygame.display.flip()
 
     def draw_board(self):
@@ -141,6 +138,21 @@ class Tetris:
                         tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
                     pygame.draw.rect(self.screen, WHITE, ((
                         tetromino.x + x) * GRID_SIZE, (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+                    
+    def draw_paused(self):
+        font = pygame.font.Font(None, 72)
+        paused_text = font.render("Paused", True, WHITE)
+        paused_rect = paused_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2))
+        self.screen.blit(paused_text, paused_rect)
+    
+    def draw_game_over(self):
+        font = pygame.font.Font(None, 72)
+        game_over_text = font.render("Game Over", True, WHITE)
+        score_text = font.render(f"Score: {self.score}", True, WHITE)
+        game_over_rect = game_over_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 - 50))
+        score_rect = score_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 50))
+        self.screen.blit(game_over_text, game_over_rect)
+        self.screen.blit(score_text, score_rect)
 
     def collision(self, x_move, y_move, rotated_shape=None):
         shape = rotated_shape if rotated_shape is not None else self.current_piece.shape
@@ -155,11 +167,11 @@ class Tetris:
                     if board_x < 0 or board_x >= len(self.board[0]) or board_y >= len(self.board):
                         return True
 
-                        # Check for floor collision
+                    # Check for floor collision
                     if board_y < 0:
                         continue
 
-                        # Check for collision with locked Tetrominos
+                    # Check for collision with locked Tetrominos
                     if self.board[board_y][board_x]:
                         return True
 
