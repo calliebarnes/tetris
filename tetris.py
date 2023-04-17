@@ -16,16 +16,22 @@ BOARD_OFFSET_Y = (SCREEN_HEIGHT - GRID_SIZE * BOARD_HEIGHT) // 2
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
 RED = (255, 0, 0)
+GREEN = (0, 255, 0)
+BLUE = (0, 0, 255)
+YELLOW = (255, 255, 0)
+ORANGE = (255, 165, 0)
+AQUA = (0, 255, 255)
+PURPLE = (128, 0, 128)
 
 # Tetrominoes
 TETROMINOES = [
-    {"shape": [[1, 1, 1, 1]], "color": (0, 255, 255)},  # I
-    {"shape": [[1, 1], [1, 1]], "color": (255, 255, 0)},  # O
-    {"shape": [[0, 1, 0], [1, 1, 1]], "color": (128, 0, 128)},  # T
-    {"shape": [[0, 1, 1], [1, 1, 0]], "color": (0, 255, 0)},  # S
-    {"shape": [[1, 1, 0], [0, 1, 1]], "color": (255, 0, 0)},  # Z
-    {"shape": [[1, 0, 0], [1, 1, 1]], "color": (0, 0, 255)},  # J
-    {"shape": [[0, 0, 1], [1, 1, 1]], "color": (255, 165, 0)},  # L
+    {"shape": [[1, 1, 1, 1]], "color": AQUA},  # I
+    {"shape": [[1, 1], [1, 1]], "color": YELLOW},  # O
+    {"shape": [[0, 1, 0], [1, 1, 1]], "color": PURPLE},  # T
+    {"shape": [[0, 1, 1], [1, 1, 0]], "color": GREEN},  # S
+    {"shape": [[1, 1, 0], [0, 1, 1]], "color": RED},  # Z
+    {"shape": [[1, 0, 0], [1, 1, 1]], "color": BLUE},  # J
+    {"shape": [[0, 0, 1], [1, 1, 1]], "color": ORANGE},  # L
 ]
 
 class Tetromino:
