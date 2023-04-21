@@ -61,6 +61,7 @@ class Tetris:
         self.gravity_timer = pygame.time.get_ticks()
         self.score = 0
         self.lines_cleared = 0
+        self.level = 1
         self.game_over = False
         self.paused = False
         self.next_piece = self.generate_random_tetromino()
@@ -108,7 +109,7 @@ class Tetris:
 
     def update(self):
         current_time = pygame.time.get_ticks()
-        if current_time - self.gravity_timer >= GRAVITY_DELAY:
+        if current_time - self.gravity_timer >= GRAVITY_DELAY // self.level:
             if not self.collision(0, 1):
                 self.current_piece.move(0, 1)
             else:
@@ -134,6 +135,7 @@ class Tetris:
         self.draw_score()
         self.draw_lines_cleared()
         self.draw_next_piece()
+        self.draw_level()
         if self.paused:
             self.draw_paused()
         if self.game_over:
@@ -233,6 +235,7 @@ class Tetris:
         if len(lines_to_clear) == 4:
             self.flash_animation(lines_to_clear)
 
+        self.update_level()
     def generate_random_tetromino(self):
         tetromino_data = random.choice(TETROMINOES)
         return Tetromino(5, 0, tetromino_data['shape'], tetromino_data['color'])
@@ -263,6 +266,15 @@ class Tetris:
             self.draw_board()
             pygame.display.flip()
             pygame.time.delay(75)  # Time in milliseconds for the flash to stay off the screen
+
+    def update_level(self):
+        self.level = self.lines_cleared // 10 + 1
+    
+    def draw_level(self):
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Level: {self.level}", 1, WHITE)
+        self.screen.blit(text, (10, 90))
+
 
 
 if __name__ == '__main__':
