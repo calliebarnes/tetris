@@ -60,6 +60,7 @@ class Tetris:
             5, 0, tetromino_data['shape'], tetromino_data['color'])
         self.gravity_timer = pygame.time.get_ticks()
         self.score = 0
+        self.lines_cleared = 0
         self.game_over = False
         self.paused = False
         self.next_piece = self.generate_random_tetromino()
@@ -117,11 +118,17 @@ class Tetris:
         text = font.render(f"Score: {self.score}", 1, WHITE)
         self.screen.blit(text, (10, 10))
 
+    def draw_lines_cleared(self):
+        font = pygame.font.Font(None, 36)
+        text = font.render(f"Lines: {self.lines_cleared}", 1, WHITE)
+        self.screen.blit(text, (10, 50))
+
     def draw(self):
         self.screen.fill(BLACK)
         self.draw_board()
         self.draw_tetromino(self.current_piece)
         self.draw_score()
+        self.draw_lines_cleared()
         self.draw_next_piece()
         if self.paused:
             self.draw_paused()
@@ -217,6 +224,7 @@ class Tetris:
             self.board.insert(0, [0] * 10)
 
         self.score += len(lines_to_clear) ** 2
+        self.lines_cleared += len(lines_to_clear)
 
     def generate_random_tetromino(self):
         tetromino_data = random.choice(TETROMINOES)
