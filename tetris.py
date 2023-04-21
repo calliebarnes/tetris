@@ -65,6 +65,10 @@ class Tetris:
         self.paused = False
         self.next_piece = self.generate_random_tetromino()
 
+    def darken_color(self, color, amount=30):
+        r, g, b = color
+        return max(0, r - amount), max(0, g - amount), max(0, b - amount)
+
     def run(self):
         while True:
             self.handle_events()
@@ -147,13 +151,13 @@ class Tetris:
 
         board_outline_rect = pygame.Rect(BOARD_OFFSET_X, BOARD_OFFSET_Y, 10 * GRID_SIZE, 20 * GRID_SIZE)
         pygame.draw.rect(self.screen, WHITE, board_outline_rect, 3)
-        
+  
     def draw_tetromino(self, tetromino):
         for y, row in enumerate(tetromino.shape):
             for x, cell in enumerate(row):
                 if cell:
                     pygame.draw.rect(self.screen, tetromino.color, (BOARD_OFFSET_X + (tetromino.x + x) * GRID_SIZE, BOARD_OFFSET_Y + (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
-                    pygame.draw.rect(self.screen, WHITE, (BOARD_OFFSET_X + (tetromino.x + x) * GRID_SIZE, BOARD_OFFSET_Y + (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+                    pygame.draw.rect(self.screen, self.darken_color(tetromino.color), (BOARD_OFFSET_X + (tetromino.x + x) * GRID_SIZE, BOARD_OFFSET_Y + (tetromino.y + y) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
 
     def draw_paused(self):
         font = pygame.font.Font(None, 72)
