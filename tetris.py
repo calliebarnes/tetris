@@ -226,6 +226,9 @@ class Tetris:
         self.score += len(lines_to_clear) ** 2
         self.lines_cleared += len(lines_to_clear)
 
+        if len(lines_to_clear) == 4:
+            self.flash_animation(lines_to_clear)
+
     def generate_random_tetromino(self):
         tetromino_data = random.choice(TETROMINOES)
         return Tetromino(5, 0, tetromino_data['shape'], tetromino_data['color'])
@@ -241,6 +244,21 @@ class Tetris:
                 if cell:
                     pygame.draw.rect(self.screen, self.next_piece.color, ((next_piece_x + x) * GRID_SIZE, (next_piece_y + y + 2) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0)
                     pygame.draw.rect(self.screen, WHITE, ((next_piece_x + x) * GRID_SIZE, (next_piece_y + y + 2) * GRID_SIZE, GRID_SIZE, GRID_SIZE), 1)
+
+    def flash_animation(self, lines):
+        for _ in range(2):  # Number of times to flash
+            for line in lines:
+                for x in range(BOARD_WIDTH):
+                    pygame.draw.rect(
+                        self.screen, WHITE,
+                        (BOARD_OFFSET_X + x * GRID_SIZE, BOARD_OFFSET_Y + line * GRID_SIZE, GRID_SIZE, GRID_SIZE), 0
+                    )
+            pygame.display.flip()
+            pygame.time.delay(75)  # Time in milliseconds for the flash to stay on the screen
+
+            self.draw_board()
+            pygame.display.flip()
+            pygame.time.delay(75)  # Time in milliseconds for the flash to stay off the screen
 
 
 if __name__ == '__main__':
