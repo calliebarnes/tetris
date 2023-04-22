@@ -65,6 +65,7 @@ class Tetris:
         self.game_over = False
         self.paused = False
         self.next_piece = self.generate_random_tetromino()
+        self.high_scores = self.load_high_scores()
 
     def darken_color(self, color, amount=30):
         r, g, b = color
@@ -104,6 +105,7 @@ class Tetris:
     def check_game_over(self):
         for x, cell in enumerate(self.board[0]):
             if cell:
+                self.update_high_scores()
                 self.game_over = True
                 break
 
@@ -175,6 +177,7 @@ class Tetris:
         score_rect = score_text.get_rect(center=(SCREEN_WIDTH/2, SCREEN_HEIGHT/2 + 50))
         self.screen.blit(game_over_text, game_over_rect)
         self.screen.blit(score_text, score_rect)
+        self.draw_high_scores()
 
     def collision(self, x_move, y_move, rotated_shape=None):
         shape = rotated_shape if rotated_shape is not None else self.current_piece.shape
@@ -275,6 +278,33 @@ class Tetris:
         text = font.render(f"Level: {self.level}", 1, WHITE)
         self.screen.blit(text, (10, 90))
 
+    def load_high_scores(self, file_name='high_scores.txt'):
+        try:
+            with open(file_name, 'r') as file:
+                scores = [int(line.strip()) for line in file.readlines()]
+        except FileNotFoundError:
+            scores = [0] * 5  # Create a default list with 5 zeros if the file is not found
+        return scores
+    
+    def save_high_scores(self, high_scores, file_name='high_scores.txt'):
+        with open(file_name, 'w') as file:
+            for score in high_scores:
+                file.write(str(score) + '\n')
+
+    def update_high_scores(self):
+        self.high_scores.append(self.score)
+        self.high_scores.sort(reverse=True)
+        self.high_scores = self.high_scores[:5]  # Keep only the top 5 scores
+        self.save_high_scores(self.high_scores)
+
+    def draw_high_scores(self):
+        font = pygame.font.Font(None, 36)
+        header = font.render("High Scores:", True, WHITE)
+        self.screen.blit(header, (10, 130))
+
+        for i, score in enumerate(self.high_scores, start=1):
+            text = font.render(f"{i}. {score}", True, WHITE)
+            self.screen.blit(text, (10, 130 + i * 40))
 
 
 if __name__ == '__main__':
