@@ -79,14 +79,20 @@ class Tetris:
             self.draw()
             self.clock.tick(30)
 
+    def toggle_pause(self):
+        self.paused = not self.paused
+
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == pygame.KEYDOWN:
-                self.handle_piece_movement(event)
-
+                if event.key == pygame.K_p:  # Pause the game when the P key is pressed
+                    self.toggle_pause()
+                elif not self.paused:  # Only handle piece movement if the game is not paused
+                    self.handle_piece_movement(event)
+            
     def handle_piece_movement(self, event):
         if event.key == pygame.K_UP:
             rotated_shape = list(zip(*reversed(self.current_piece.shape)))
